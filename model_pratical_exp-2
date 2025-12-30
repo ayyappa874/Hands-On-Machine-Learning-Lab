@@ -1,0 +1,45 @@
+//sayyappa
+import pandas as pd
+
+# Load dataset
+data = pd.read_csv("candidate_elimination.csv")
+
+# Separate features and target
+X = data.iloc[:, :-1].values
+y = data.iloc[:, -1].values
+
+# Initialize S and G
+num_attributes = X.shape[1]
+S = ['Ø'] * num_attributes
+G = [['?'] * num_attributes]
+
+# Candidate Elimination Algorithm
+for i in range(len(X)):
+    if y[i] == 'Yes':  # Positive example
+        # Update S
+        for j in range(num_attributes):
+            if S[j] == 'Ø':
+                S[j] = X[i][j]
+            elif S[j] != X[i][j]:
+                S[j] = '?'
+
+        # Remove inconsistent hypotheses from G
+        G = [g for g in G if all(g[j] == '?' or g[j] == S[j] for j in range(num_attributes))]
+
+    else:  # Negative example
+        new_G = []
+        for g in G:
+            for j in range(num_attributes):
+                if g[j] == '?' and S[j] != X[i][j]:
+                    new_hypothesis = g.copy()
+                    new_hypothesis[j] = S[j]
+                    new_G.append(new_hypothesis)
+        G = new_G
+
+    print(f"\nAfter Example {i+1}")
+    print("S =", S)
+    print("G =", G)
+
+print("\nFinal Version Space:")
+print("Specific Boundary (S):", S)
+print("General Boundary (G):", G)
